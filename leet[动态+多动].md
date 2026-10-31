@@ -397,3 +397,132 @@ class Solution:
 ```
 
 ---
+---
+## 136. 只出现一次的数字
+**核心思路：异或运算性质**
+异或几个关键性质：
+1. `a ^ a = 0` 相同数字异或抵消
+2. `0 ^ a = a` 0异或任何数等于它本身
+1. 初始化结果res=0
+2. 遍历数组每个数字，不断和res做异或
+3. 遍历结束，返回res
+
+```
+class Solution:
+    def singleNumber(self, nums: List[int]) -> int:
+        res=0
+        for num in nums:
+            res^=num
+        return res
+```
+
+---
+## 169. 多数元素
+**核心思路：
+把不同元素两两抵消，多数元素出现次数>n/2，抵消完最后剩下的候选一定是多数元素
+1. 初始化候选candidate，计数器count=0
+2. 遍历每个数字：
+   - count=0时，把当前数字设为新候选
+   - 当前数等于候选，count+1；否则count-1
+3. 遍历结束返回候选（题目保证一定存在多数元素，不用二次校验）
+
+```
+class Solution:
+    def majorityElement(self, nums: list[int]) -> int:
+        candidate = 0
+        count = 0
+        for num in nums:
+            if count == 0:
+                candidate = num
+            if num == candidate:
+                count += 1
+            else:
+                count -= 1
+        return candidate
+```
+
+
+---
+## 75. 颜色分类
+**核心思路：三指针原地分区**
+1. p0=0，p2=len(nums)-1，curr=0
+2. curr <= p2 循环扫描：
+   - nums[curr]==0：交换curr和p0，p0、curr同时右移
+   - nums[curr]==2：交换curr和p2，p2左移（curr不动！换过来的数还没检查）
+   - nums[curr]==1：curr直接右移
+3. 原地修改数组，无返回值
+
+```
+class Solution:
+    def sortColors(self, self, nums: list[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        p0 = 0
+        p2 = len(nums) - 1
+        curr = 0
+        while curr <= p2:
+            if nums[curr] == 0:
+                nums[curr], nums[p0] = nums[p0], nums[curr]
+                p0 += 1
+                curr += 1
+            elif nums[curr] == 2:
+                nums[curr], nums[p2] = nums[p2], nums[curr]
+                p2 -= 1
+            else:
+                curr += 1
+```
+
+---
+## 31. 下一个排列
+**核心思路：字典序排列规则**
+1. 从右往左找第一个 `nums[i] < nums[i+1]` 的拐点i
+2. 找到i后，从右端找第一个大于nums[i]的j，交换nums[i]、nums[j]
+3. 反转i下标之后的所有元素，把后面改成升序（字典序最小）
+4. i找不到（整体降序），反转整个数组
+
+```
+from typing import List
+class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        n = len(nums)
+        i = n - 2
+        while i >= 0 and nums[i] >= nums[i+1]:
+            i -= 1
+        if i >= 0:
+            j = n - 1
+            while nums[j] <= nums[i]:
+                j -= 1
+            nums[i], nums[j] = nums[j], nums[i]
+        left, right = i + 1, n - 1
+        while left < right:
+            nums[left], nums[right] = nums[right], nums[left]
+            left += 1
+            right -= 1
+```
+
+---
+## 287. 寻找重复数（快慢指针，判环找环入口）
+**核心思路：隐式链表成环**
+1.slow、fast 起点都是 nums [0]
+2. 第一阶段：slow一次走一步 `nums[slow]`，fast一次走两步 `nums[nums[fast]]`，直到相遇
+3. 第二阶段：fast重置到起点nums[0]，slow、fast都一次走一步
+4. 再次相遇的值，就是重复数字
+
+```
+from typing import List
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        slow = nums[0]
+        fast = nums[0]
+        while True:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+            if slow == fast:
+                break
+        fast = nums[0]
+        while slow != fast:
+            slow = nums[slow]
+            fast = nums[fast]
+        return slow
+```
